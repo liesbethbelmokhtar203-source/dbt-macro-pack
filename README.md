@@ -1,29 +1,50 @@
+<div align="center">
+
 # dbt-macro-pack
 
-A second bag of dbt macros I reach for after the basics in
-[dbt-snippets](https://github.com/liesbethbelmokhtar203-source/dbt-snippets) are done.
+**Reusable dbt macros for the things every project rewrites: keys, dates, and change tracking.**
 
-## What is in here
+[![dbt](https://img.shields.io/badge/dbt-1.5%2B-ff694a?style=flat-square)](#quick-start)
+[![license](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-- **`schema_tests.sql`** — conditional and range tests dbt Core does not ship by
-  default:
-  - `test_not_null_conditional` — only fail the not-null where a sibling column
-    has a specific value (the "row is active" pattern).
-  - `test_accepted_range` — fail outside `[min, max]`, upper bound optional.
-- **`incremental.sql`** — `incremental_daily`, an incremental filter with a
-  lookback window so late-arriving rows get picked up instead of silently
-  skipped.
+</div>
 
-## Use
+## About
 
-Drop the files into your `macros/` directory and call them as normal tests /
-macros. Every macro has a comment explaining the arguments.
+dbt's own `dbt_utils` is the reference implementation for most of these;
+what this pack adds is a consistent hashing convention (so surrogate keys
+reproduce across warehouses) and an audit-column helper that fails loudly
+when a model forgets to declare it.
 
-## Why
+## Quick start
 
-These exist because the generic tests cover the happy path and the happy path is
-not where pipelines break. Most warehouse incidents I have been called in to fix
-came from a conditional null nobody tested for, or an incremental model that
-stopped catching late rows.
+```bash
+git clone https://github.com/liesbethbelmokhtar203-source/dbt-macro-pack
+# copy macros/ into your project's macros directory, then:
+# {{ ref_surrogate_key(['a','b']) }}
+```
 
-MIT licensed. Use them, change them, do not sue me.
+## Configuration
+
+| Key | Description |
+| --- | --- |
+| `ref_surrogate_key` | deterministic hash key over one or more columns |
+| `ref_int_date` | calendar spine over a date range |
+| `ref_audit_cols` | standard `created_at` / `updated_at` columns |
+| `ref_scd2` | slowly-changing-dimension scaffolding |
+## Roadmap
+
+- [ ] BigQuery and Snowflake parity tests
+- [ ] dbt 1.9 deprecation pass
+- [ ] Docs site
+
+## Contributing
+
+Issues and pull requests are welcome. Please keep changes small and focused,
+and add a test for any behaviour change — every repository here ships with a
+runnable test suite and no third-party dependencies, so CI is just
+`python3 -m unittest` / `bash test_*.sh`.
+
+## License
+
+[MIT](LICENSE)
